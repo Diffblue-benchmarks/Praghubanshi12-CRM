@@ -1,0 +1,346 @@
+buildCmd: cd "./CRM1"; mvn -e -X -Dmaven.test.skip=true compile
+testCmd: true
+lineLength: 4096
+skipVerification: true
+cbmcArguments:
+  # Do not generate coverage comments on generated tests.
+  java-generate-no-comments: true
+phases:
+  -
+  #Phase 0 PRETTY AND SIMPLE - Simple models, quick cover, pretty Tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # Instrument the file as opposed to the function only
+      cover-only: file
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 1 PRETTY AND COMPLEX - Standard models, longer run time, pretty tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 2
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # instrument the file as opposed to the function only
+      cover-only: file
+  -
+  #Phase 2 Simple and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # If the logs contain output of the following then proceed to phase X
+    nextPhase:
+      # If the function is not analysable then do not pass onto the next phase
+      not_analyzed: null
+  -
+  #Phase 3 Complex and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 3000
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 3
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 4 EXCEPTIONS
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: true
+      # Set an upper bound on loop unwinding.
+  -
+    #PHASE 5 Big numbers and less contraints on inputs 
+    timeout: 300
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 100
+      # Bound the length of input strings.
+      max-nondet-string-length: 100
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 6
+units:
+# Target TGF: 10.0
+#  >methods=11
+#  >complexity=40
+#  >construction=1.25
+#  >dependency=5.0
+ - target:
+   - dir: CRM1/target/classes
+     file: com/cibt/crm1/entity/common/MasterEntity.class
+     sourceDir: CRM1/src/main/java
+     sourceFile: com/cibt/crm1/entity/common/MasterEntity.java
+# Target TGF: 21.25
+#  >methods=9
+#  >complexity=86
+#  >construction=2.75
+#  >dependency=2.5
+ - target:
+   - dir: CRM1/target/classes
+     file: com/cibt/crm1/repository/impl/EnquiryStatusRepositoryImpl.class
+     sourceDir: CRM1/src/main/java
+     sourceFile: com/cibt/crm1/repository/impl/EnquiryStatusRepositoryImpl.java
+   - dir: CRM1/target/classes
+     file: com/cibt/crm1/entity/master/EnquiryStatus.class
+     sourceDir: CRM1/src/main/java
+     sourceFile: com/cibt/crm1/entity/master/EnquiryStatus.java
+   - dir: CRM1/target/classes
+     file: com/cibt/crm1/repository/impl/EnquiryStatusRepositoryImpl$2.class
+     sourceDir: CRM1/src/main/java
+     sourceFile: com/cibt/crm1/repository/impl/EnquiryStatusRepositoryImpl.java
+   - dir: CRM1/target/classes
+     file: com/cibt/crm1/repository/impl/EnquiryStatusRepositoryImpl$1.class
+     sourceDir: CRM1/src/main/java
+     sourceFile: com/cibt/crm1/repository/impl/EnquiryStatusRepositoryImpl.java
+   - dir: CRM1/target/classes
+     file: com/cibt/crm1/repository/EnquiryStatusRepository.class
+     sourceDir: CRM1/src/main/java
+     sourceFile: com/cibt/crm1/repository/EnquiryStatusRepository.java
+# Target TGF: 21.25
+#  >methods=9
+#  >complexity=86
+#  >construction=2.75
+#  >dependency=2.5
+ - target:
+   - dir: CRM1/target/classes
+     file: com/cibt/crm1/repository/impl/EnquirySourceRepositoryImpl.class
+     sourceDir: CRM1/src/main/java
+     sourceFile: com/cibt/crm1/repository/impl/EnquirySourceRepositoryImpl.java
+   - dir: CRM1/target/classes
+     file: com/cibt/crm1/repository/impl/EnquirySourceRepositoryImpl$2.class
+     sourceDir: CRM1/src/main/java
+     sourceFile: com/cibt/crm1/repository/impl/EnquirySourceRepositoryImpl.java
+   - dir: CRM1/target/classes
+     file: com/cibt/crm1/entity/master/EnquirySource.class
+     sourceDir: CRM1/src/main/java
+     sourceFile: com/cibt/crm1/entity/master/EnquirySource.java
+   - dir: CRM1/target/classes
+     file: com/cibt/crm1/repository/impl/EnquirySourceRepositoryImpl$1.class
+     sourceDir: CRM1/src/main/java
+     sourceFile: com/cibt/crm1/repository/impl/EnquirySourceRepositoryImpl.java
+   - dir: CRM1/target/classes
+     file: com/cibt/crm1/repository/EnquirySourceRepository.class
+     sourceDir: CRM1/src/main/java
+     sourceFile: com/cibt/crm1/repository/EnquirySourceRepository.java
+# Target TGF: 21.75
+#  >methods=7
+#  >complexity=57
+#  >construction=1.5
+#  >dependency=3.0
+ - target:
+   - dir: CRM1/target/classes
+     file: com/cibt/crm1/service/impl/EnquiryStatusServiceImpl.class
+     sourceDir: CRM1/src/main/java
+     sourceFile: com/cibt/crm1/service/impl/EnquiryStatusServiceImpl.java
+   - dir: CRM1/target/classes
+     file: com/cibt/crm1/repository/EnquiryStatusRepository.class
+     sourceDir: CRM1/src/main/java
+     sourceFile: com/cibt/crm1/repository/EnquiryStatusRepository.java
+   - dir: CRM1/target/classes
+     file: com/cibt/crm1/entity/master/EnquiryStatus.class
+     sourceDir: CRM1/src/main/java
+     sourceFile: com/cibt/crm1/entity/master/EnquiryStatus.java
+   - dir: CRM1/target/classes
+     file: com/cibt/crm1/service/EnquiryStatusService.class
+     sourceDir: CRM1/src/main/java
+     sourceFile: com/cibt/crm1/service/EnquiryStatusService.java
+   - dir: CRM1/target/classes
+     file: com/cibt/crm1/dto/EnquiryStatusDTO.class
+     sourceDir: CRM1/src/main/java
+     sourceFile: com/cibt/crm1/dto/EnquiryStatusDTO.java
+# Target TGF: 26.0
+#  >methods=7
+#  >complexity=58
+#  >construction=2.75
+#  >dependency=4.0
+ - target:
+   - dir: CRM1/target/classes
+     file: com/cibt/crm1/controller/master/EnquiryStatusController.class
+     sourceDir: CRM1/src/main/java
+     sourceFile: com/cibt/crm1/controller/master/EnquiryStatusController.java
+   - dir: CRM1/target/classes
+     file: com/cibt/crm1/service/EnquiryStatusService.class
+     sourceDir: CRM1/src/main/java
+     sourceFile: com/cibt/crm1/service/EnquiryStatusService.java
+   - dir: CRM1/target/classes
+     file: com/cibt/crm1/controller/master/CRUDController.class
+     sourceDir: CRM1/src/main/java
+     sourceFile: com/cibt/crm1/controller/master/CRUDController.java
+# Target TGF: 21.75
+#  >methods=7
+#  >complexity=57
+#  >construction=1.5
+#  >dependency=3.0
+ - target:
+   - dir: CRM1/target/classes
+     file: com/cibt/crm1/service/impl/EnquirySourceServiceImpl.class
+     sourceDir: CRM1/src/main/java
+     sourceFile: com/cibt/crm1/service/impl/EnquirySourceServiceImpl.java
+   - dir: CRM1/target/classes
+     file: com/cibt/crm1/repository/EnquirySourceRepository.class
+     sourceDir: CRM1/src/main/java
+     sourceFile: com/cibt/crm1/repository/EnquirySourceRepository.java
+   - dir: CRM1/target/classes
+     file: com/cibt/crm1/dto/EnquirySourceDTO.class
+     sourceDir: CRM1/src/main/java
+     sourceFile: com/cibt/crm1/dto/EnquirySourceDTO.java
+   - dir: CRM1/target/classes
+     file: com/cibt/crm1/entity/master/EnquirySource.class
+     sourceDir: CRM1/src/main/java
+     sourceFile: com/cibt/crm1/entity/master/EnquirySource.java
+   - dir: CRM1/target/classes
+     file: com/cibt/crm1/service/EnquirySourceService.class
+     sourceDir: CRM1/src/main/java
+     sourceFile: com/cibt/crm1/service/EnquirySourceService.java
+# Target TGF: 26.0
+#  >methods=7
+#  >complexity=58
+#  >construction=2.75
+#  >dependency=4.0
+ - target:
+   - dir: CRM1/target/classes
+     file: com/cibt/crm1/controller/master/EnquirySourceController.class
+     sourceDir: CRM1/src/main/java
+     sourceFile: com/cibt/crm1/controller/master/EnquirySourceController.java
+   - dir: CRM1/target/classes
+     file: com/cibt/crm1/service/EnquirySourceService.class
+     sourceDir: CRM1/src/main/java
+     sourceFile: com/cibt/crm1/service/EnquirySourceService.java
+   - dir: CRM1/target/classes
+     file: com/cibt/crm1/controller/master/CRUDController.class
+     sourceDir: CRM1/src/main/java
+     sourceFile: com/cibt/crm1/controller/master/CRUDController.java
+# Target TGF: 21.0
+#  >methods=7
+#  >complexity=36
+#  >construction=2.5
+#  >dependency=4.0
+ - target:
+   - dir: CRM1/target/classes
+     file: com/cibt/crm1/service/impl/EnquiryServiceImpl.class
+     sourceDir: CRM1/src/main/java
+     sourceFile: com/cibt/crm1/service/impl/EnquiryServiceImpl.java
+   - dir: CRM1/target/classes
+     file: com/cibt/crm1/service/EnquiryService.class
+     sourceDir: CRM1/src/main/java
+     sourceFile: com/cibt/crm1/service/EnquiryService.java
+# Target TGF: 23.5
+#  >methods=9
+#  >complexity=46
+#  >construction=2.75
+#  >dependency=5.0
+ - target:
+   - dir: CRM1/target/classes
+     file: com/cibt/crm1/repository/impl/EnquiryRepositoryImpl.class
+     sourceDir: CRM1/src/main/java
+     sourceFile: com/cibt/crm1/repository/impl/EnquiryRepositoryImpl.java
+   - dir: CRM1/target/classes
+     file: com/cibt/crm1/repository/EnquiryRepository.class
+     sourceDir: CRM1/src/main/java
+     sourceFile: com/cibt/crm1/repository/EnquiryRepository.java
+# Target TGF: 12.0
+#  >methods=7
+#  >complexity=12
+#  >construction=1.0
+#  >dependency=1.0
+ - target:
+   - dir: CRM1/target/classes
+     file: com/cibt/crm1/controller/master/CRUDController.class
+     sourceDir: CRM1/src/main/java
+     sourceFile: com/cibt/crm1/controller/master/CRUDController.java
